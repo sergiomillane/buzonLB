@@ -1,6 +1,7 @@
-Flask
-Flask_SQLAlchemy
+flask
+flask_sqlalchemy
 pandas
-openpyxl
 pyodbc
-SQLAlchemy
+sqlalchemy
+openpyxl
+gunicorn

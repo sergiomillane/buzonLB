@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: flask-sqlserver
+    env: python
+    buildCommand: "./build.sh && pip install -r requirements.txt"
+    startCommand: "gunicorn index:app"
+    plan: free
