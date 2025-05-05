@@ -3,23 +3,17 @@ from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 from datetime import datetime, timedelta
 import os
-import urllib
 from io import BytesIO
 
 app = Flask(__name__)
 app.secret_key = 'clave_super_secreta_123'
 
-params = urllib.parse.quote_plus(
-    "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=52.167.231.145,51433;"
-    "DATABASE=CreditoYCobranza;"
-    "UID=credito;"
-    "PWD=Cr3d$.23xme;"
-)
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mssql+pyodbc:///?odbc_connect={params}"
+# CAMBIO AQUÍ: usar SQLite en lugar de SQL Server
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///respuestas.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
 
 class Respuesta(db.Model):
     __tablename__ = 'respuestas'
