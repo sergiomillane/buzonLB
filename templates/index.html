@@ -1,0 +1,129 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="container mt-5">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Casos de envío anómalos</h2>
+    <div>
+      <span class="badge bg-secondary">No resueltos: {{ contador_no_resueltos }}</span>
+      <span class="badge bg-success">Resueltos F: {{ contador_fp }}</span>
+      <span class="badge bg-danger">Resueltos V: {{ contador_vp }}</span>
+    </div>
+  </div>
+
+  <form method="GET" class="row g-3 mb-4">
+    <div class="col-md-4">
+      <label class="form-label">Fecha</label>
+      <input type="date" name="fecha" class="form-control" value="{{ filtros.fecha }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Estatus</label>
+      <select name="estatus" class="form-select">
+        <option value="">Todos</option>
+        <option value="Resuelto" {% if filtros.estatus == 'Resuelto' %}selected{% endif %}>Resuelto</option>
+        <option value="No resuelto" {% if filtros.estatus == 'No resuelto' %}selected{% endif %}>No resuelto</option>
+      </select>
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+      <button class="btn btn-primary me-2">Filtrar</button>
+      <a href="/exportar?fecha={{ filtros.fecha }}&estatus={{ filtros.estatus }}" class="btn btn-success">Exportar a Excel</a>
+    </div>
+  </form>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <style>
+    td {
+      word-wrap: break-word;
+      word-break: break-word;
+      white-space: normal;
+    }
+    .dropdown-menu select {
+      width: 100%;
+    }
+  </style>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-sm align-middle text-center" style="table-layout: fixed;">
+      <thead class="table-dark">
+        <tr>
+          <th>Fecha</th>
+          <th>Orden</th>
+          <th>Carrier</th>
+          <th>Guía</th>
+          <th>Canal</th>
+          <th>SKU</th>
+          <th>Costo Actual</th>
+          <th>Costo Usual</th>
+          <th>Valores Diferentes</th>
+          <th>Total Registros</th>
+          <th>Clasificación</th>
+          <th>Justificación</th>
+          <th>Estatus</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in range(alertas.shape[0]) %}
+        {% set alerta = alertas.iloc[i] %}
+        <tr>
+          <td>{{ alerta['Fecha'] }}</td>
+          <td>{{ alerta['Orden'] }}</td>
+          <td>{{ alerta['Carrier'] }}</td>
+          <td>{{ alerta['Guia'] }}</td>
+          <td>{{ alerta['Canal'] }}</td>
+          <td>{{ alerta['Sku'] }}</td>
+          <td>{{ alerta['CostoActual'] }}</td>
+          <td>{{ alerta['CostoUsual'] }}</td>
+          <td>{{ alerta['ValoresDiferentes'] }}</td>
+          <td>{{ alerta['Total_Registros'] }}</td>
+          <td>
+            {% if alerta['Estatus'] == 'Resuelto' %}
+              {{ alerta['clasificacion'] }}
+            {% else %}
+              <form method="POST" action="/guardar" class="d-flex flex-column align-items-center">
+                <input type="hidden" name="orden" value="{{ alerta['Orden'] }}">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="clasificacion" value="V" required> V
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="clasificacion" value="F"> F
+                </div>
+          </td>
+          <td>
+                <select class="form-select" name="justificacion" required>
+                  <option value="">Selecc</option>
+                  <option value="Fuera de cobertura">Fuera de cobertura</option>
+                  <option value="Ajuste temporal">Ajuste temporal</option>
+                  <option value="Error humano">Error humano</option>
+                  <option value="Error técnico">Error técnico</option>
+                  <option value="Otro">Otro</option>
+                </select>
+          </td>
+          <td>
+                <button class="btn btn-sm btn-success mt-2">Guardar</button>
+              </form>
+              <span class="badge bg-warning text-dark">No resuelto</span>
+            {% endif %}
+            {% if alerta['Estatus'] == 'Resuelto' %}
+              <td>{{ alerta['justificacion'] }}</td>
+              <td><span class="badge bg-success">Resuelto</span></td>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

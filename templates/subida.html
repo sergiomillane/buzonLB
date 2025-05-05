@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="container mt-5">
+  <h2 class="mb-4">Importar archivo y cruzar con base</h2>
+
+  <form method="POST" enctype="multipart/form-data">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Archivo FedEx</label>
+        <input type="file" name="archivo_fedex" accept=".xlsx" class="form-control">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Archivo PEx</label>
+        <input type="file" name="archivo_dhl" accept=".xlsx" class="form-control">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Archivo Estafeta</label>
+        <input type="file" name="archivo_estafeta" accept=".xlsx" class="form-control">
+      </div>
+    </div>
+    <button class="btn btn-primary mt-3">Subir archivos</button>
+  </form>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% if resumenes %}
+    <div class="row mt-4">
+      {% for resumen in resumenes %}
+        <div class="col-md-4">
+          <div class="card border-info mb-3">
+            <div class="card-header bg-info text-white fw-bold">{{ resumen.paqueteria }}</div>
+            <div class="card-body">
+              <p class="mb-1"><strong>Coinciden:</strong> {{ resumen.coinciden }}</p>
+              <p class="mb-1"><strong>No coinciden:</strong> {{ resumen.no_coinciden }}</p>
+              <p class="mb-0"><strong>Porcentaje:</strong> {{ resumen.porcentaje }}%</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if tablas %}
+    <div class="mt-4">
+      {% for nombre, tabla in tablas %}
+        <h4 class="mt-4">Resultado de {{ nombre }}</h4>
+        <div class="table-responsive">
+          {{ tabla|safe }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

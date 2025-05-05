@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">Control de Costos por SKU y Carrier</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% if tabla %}
+    <div class="table-responsive">
+      {{ tabla|safe }}
+    </div>
+  {% else %}
+    <div class="alert alert-info mt-3">No hay datos para mostrar.</div>
+  {% endif %}
+</div>
+
+<!-- DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+  $(document).ready(function() {
+    $('table').DataTable({
+      "order": [[0, "asc"]],
+      "paging": true,
+      "searching": true,
+      "info": false,
+      "language": {
+        "search": "Buscar SKU:",
+        "zeroRecords": "No se encontraron registros.",
+        "paginate": {
+          "first": "Primera",
+          "last": "Última",
+          "next": "Siguiente",
+          "previous": "Anterior"
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,6 @@
+Flask
+Flask_SQLAlchemy
+pandas
+openpyxl
+pyodbc
+SQLAlchemy
