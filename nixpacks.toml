@@ -1,2 +1,2 @@
 [phases.setup]
-nixPkgs = ['unixODBC', 'unixODBC.dev', 'python311Packages.pyodbc']
+nixPkgs = ['unixODBC', 'python311Packages.pyodbc']
