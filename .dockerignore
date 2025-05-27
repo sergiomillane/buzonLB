@@ -1,0 +1,36 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env
+*.env
+
+# OS junk files
+.DS_Store
+
+# Git-related
+.git/
+.gitignore
+
+# Fly.io config
+.fly/
+.flyignore
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+
+# Local data outputs (if applicable)
+*.sqlite3
+*.xlsx
+*.xls
+
+# Ignore compiled distributions
+build/
+dist/
+*.egg-info/

@@ -13,11 +13,11 @@
   </div>
 
   <form method="GET" class="row g-3 mb-4">
-    <div class="col-md-4">
+    <div class="col-md-3">
       <label class="form-label">Fecha</label>
       <input type="date" name="fecha" class="form-control" value="{{ filtros.fecha }}">
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
       <label class="form-label">Estatus</label>
       <select name="estatus" class="form-select">
         <option value="">Todos</option>
@@ -25,11 +25,29 @@
         <option value="No resuelto" {% if filtros.estatus == 'No resuelto' %}selected{% endif %}>No resuelto</option>
       </select>
     </div>
-    <div class="col-md-4 d-flex align-items-end">
+    <div class="col-md-3">
+      <label class="form-label">Carrier</label>
+      <select name="carrier" class="form-select">
+        <option value="">Todos</option>
+        <option value="FEDEX" {% if filtros.carrier == 'FEDEX' %}selected{% endif %}>FEDEX</option>
+        <option value="DHL" {% if filtros.carrier == 'DHL' %}selected{% endif %}>DHL</option>
+        <option value="ESTAFETA" {% if filtros.carrier == 'ESTAFETA' %}selected{% endif %}>ESTAFETA</option>
+        <option value="PMM" {% if filtros.carrier == 'PMM' %}selected{% endif %}>PMM</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Orden por Fecha</label>
+      <select name="orden_fecha" class="form-select">
+        <option value="desc" {% if filtros.orden_fecha == 'desc' %}selected{% endif %}>Más reciente</option>
+        <option value="asc" {% if filtros.orden_fecha == 'asc' %}selected{% endif %}>Más antigua</option>
+      </select>
+    </div>
+    <div class="col-md-12 d-flex justify-content-end">
       <button class="btn btn-primary me-2">Filtrar</button>
-      <a href="/exportar?fecha={{ filtros.fecha }}&estatus={{ filtros.estatus }}" class="btn btn-success">Exportar a Excel</a>
+      <a href="/exportar?fecha={{ filtros.fecha }}&estatus={{ filtros.estatus }}&carrier={{ filtros.carrier }}" class="btn btn-success">Exportar a Excel</a>
     </div>
   </form>
+  
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}

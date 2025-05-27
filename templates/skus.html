@@ -4,6 +4,10 @@
 <div class="container mt-5">
   <h2 class="mb-4 text-center">Control de Costos por SKU y Carrier</h2>
 
+  <div class="mb-3 text-end">
+    <a href="{{ url_for('exportar_skus') }}" class="btn btn-success">Exportar a Excel</a>
+  </div>
+
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, message in messages %}
@@ -26,25 +30,35 @@
 
 <!-- DataTables -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css">
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 
 <script>
   $(document).ready(function() {
     $('table').DataTable({
-      "order": [[0, "asc"]],
-      "paging": true,
-      "searching": true,
-      "info": false,
-      "language": {
-        "search": "Buscar SKU:",
-        "zeroRecords": "No se encontraron registros.",
-        "paginate": {
-          "first": "Primera",
-          "last": "Última",
-          "next": "Siguiente",
-          "previous": "Anterior"
+      order: [[1, 'asc']], // Fecha ascendente inicialmente
+      dom: 'Bfrtip',
+      buttons: [
+        {
+          extend: 'excelHtml5',
+          text: 'Exportar visible a Excel',
+          className: 'btn btn-outline-primary mb-3'
+        }
+      ],
+      language: {
+        search: "Buscar SKU o Carrier:",
+        zeroRecords: "No se encontraron registros.",
+        paginate: {
+          first: "Primera",
+          last: "Última",
+          next: "Siguiente",
+          previous: "Anterior"
         }
       }
     });

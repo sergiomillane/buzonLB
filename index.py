@@ -9,8 +9,21 @@ app = Flask(__name__)
 app.secret_key = 'clave_super_secreta_123'
 
 # CAMBIO AQUÍ: usar SQLite en lugar de SQL Server
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///respuestas.db'
+# Cambia esto:
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///respuestas.db'
+
+# Por esto:
+driver = 'ODBC%20Driver%2017%20for%20SQL%20Server'
+server = '52.167.231.145,51433'
+database = 'CreditoYCobranza'
+username = 'credito'
+password = 'Cr3d$.23xme'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    f"mssql+pyodbc://{username}:{password}@{server}/{database}?driver={driver}"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 
 db = SQLAlchemy(app)
 
@@ -23,8 +36,6 @@ class Respuesta(db.Model):
     justificacion = db.Column(db.String(100), nullable=False)
     fecha = db.Column(db.DateTime, default=datetime.now)
 
-with app.app_context():
-    db.create_all()
 
 def cargar_alertas():
     archivo_excel = os.path.join('data', 'Forza.xlsx')
@@ -97,23 +108,34 @@ def principal():
 
     fecha = request.args.get('fecha', default="")
     estatus = request.args.get('estatus', default="")
+    carrier = request.args.get('carrier', default="")
+    orden_fecha = request.args.get('orden_fecha', default="desc")
 
     if fecha:
         alertas = alertas[alertas['Fecha'].dt.strftime('%Y-%m-%d') == fecha]
     if estatus:
         alertas = alertas[alertas['Estatus'] == estatus]
+    if carrier:
+        alertas = alertas[alertas['Carrier'].str.upper() == carrier.upper()]
+
+    # Ordenamiento por fecha
+    if orden_fecha == "asc":
+        alertas = alertas.sort_values(by='Fecha', ascending=True)
+    else:
+        alertas = alertas.sort_values(by='Fecha', ascending=False)
 
     contador_no_resueltos = (alertas['Estatus'] == 'No resuelto').sum()
     contador_fp = ((alertas['Estatus'] == 'Resuelto') & (alertas['clasificacion'] == 'F')).sum()
     contador_vp = ((alertas['Estatus'] == 'Resuelto') & (alertas['clasificacion'] == 'V')).sum()
 
-    filtros = {'fecha': fecha, 'estatus': estatus}
+    filtros = {'fecha': fecha, 'estatus': estatus, 'carrier': carrier, 'orden_fecha': orden_fecha}
 
-    return render_template('index.html', alertas=alertas, 
-                           contador_no_resueltos=contador_no_resueltos, 
-                           contador_fp=contador_fp, 
+    return render_template('index.html', alertas=alertas,
+                           contador_no_resueltos=contador_no_resueltos,
+                           contador_fp=contador_fp,
                            contador_vp=contador_vp,
                            filtros=filtros)
+
 
 @app.route('/guardar', methods=['POST'])
 def guardar():
@@ -284,6 +306,35 @@ def skus():
             tabla_html = tabla_html.replace(f"<td>{valor}</td>", f"<td style='background-color:#f0f0f0'>{valor}</td>", 1)
 
     return render_template("skus.html", tabla=tabla_html)
+
+@app.route('/exportar_skus')
+def exportar_skus():
+    archivo_excel = os.path.join('data', 'Forza.xlsx')
+    df = pd.read_excel(archivo_excel, sheet_name="Hoja1")
+
+    df["carrier"] = df["carrier"].str.upper()
+    df = df[df["carrier"].isin(["FEDEX", "PMM", "ESTAFETA", "DHL"])]
+
+    resumen = df.groupby(["sku", "carrier"]).agg(
+        PromedioCosto=("costoEnvio", "mean"),
+        Conteo=("costoEnvio", "count")
+    ).reset_index()
+    resumen["PromedioCosto"] = resumen["PromedioCosto"].round(2)
+    resumen["Conteo"] = resumen["Conteo"].astype(int)
+
+    pivot_promedios = resumen.pivot(index=["sku"], columns="carrier", values="PromedioCosto").reset_index()
+    pivot_conteos = resumen.pivot(index=["sku"], columns="carrier", values="Conteo").reset_index()
+    pivot_conteos.columns = [col if col == "sku" else f"Conteo_{col}" for col in pivot_conteos.columns]
+
+    tabla_merge = pd.merge(pivot_promedios, pivot_conteos, on="sku").fillna("-")
+
+    output = BytesIO()
+    tabla_merge.to_excel(output, index=False)
+    output.seek(0)
+
+    return send_file(output, download_name="control_skus.xlsx", as_attachment=True)
+
+
 
 
 
